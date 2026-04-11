@@ -1,0 +1,25 @@
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        jcenter()
+    }
+}
+
+rootProject.name = "ScreenGuard"
+// Внимание: проект использует структуру приложения
+// Если структура файлов отличается, отредактируйте эту строку
+if (file("app").exists()) {
+    include ":app"
+} else {
+    // Основной модуль находится в корне проекта
+}
