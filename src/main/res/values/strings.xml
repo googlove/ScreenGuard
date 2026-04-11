@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ScreenGuard</string>
+    <string name="app_description">Захист від небажаних спостерігачів</string>
+
+    <!-- Main Activity -->
+    <string name="protection_active">🛡️ Захист активний</string>
+    <string name="protection_inactive">⚠️ Захист вимкнено</string>
+    <string name="enable_protection">Активувати захист</string>
+    <string name="disable_protection">Вимкнути захист</string>
+    <string name="alert_attempts">Спроб доступу: </string>
+
+    <!-- Navigation -->
+    <string name="allowed_contacts">📋 Дозволені контакти</string>
+    <string name="history">📊 Історія спроб</string>
+    <string name="settings">⚙️ Налаштування</string>
+
+    <!-- Alert Activity -->
+    <string name="alert_warning">🚨 ПОПЕРЕДЖЕННЯ!</string>
+    <string name="alert_message">Стороння особа дивиться на ваш екран!</string>
+    <string name="dismiss">Закрити</string>
+    <string name="report">Повідомити</string>
+    <string name="report_title">Повідомити про інцидент</string>
+    <string name="report_message">Деталі інциденту збережені. Дякуємо за інформацію.</string>
+
+    <!-- Whitelist Activity -->
+    <string name="add_contact">➕ Додати контакт</string>
+    <string name="contact_name">Ім\'я</string>
+    <string name="add_contact_dialog">Додати контакт</string>
+    <string name="enter_name">Введіть ім\'я контакту</string>
+    <string name="contact_added">Контакт додано</string>
+    <string name="contact_removed">Контакт видалено</string>
+    <string name="no_contacts">Немає доданих контактів</string>
+
+    <!-- History Activity -->
+    <string name="clear_history">🗑️ Видалити історію</string>
+    <string name="clear_history_title">Видалити історію?</string>
+    <string name="clear_history_message">Ви впевнені, що хочете видалити всю історію?</string>
+    <string name="confirm">Видалити</string>
+    <string name="cancel">Скасувати</string>
+    <string name="no_records">Немає записів</string>
+
+    <!-- Settings Activity -->
+    <string name="notifications">Сповіщення</string>
+    <string name="vibration">Вібрація</string>
+    <string name="sound">Звук</string>
+    <string name="about">ℹ️ Про додаток</string>
+    <string name="about_title">Про додаток</string>
+    <string name="about_message">ScreenGuard v1.0.0\n\nДодаток для захисту вашого приватності від небажаних спостерігачів.\n\n© 2024 ScreenGuard</string>
+
+    <!-- Permissions -->
+    <string name="camera_permission_required">Дозвіл на камеру необхідний</string>
+    <string name="notification_permission_required">Дозвіл на сповіщення необхідний</string>
+
+    <!-- Service -->
+    <string name="protection_enabled">Захист включено</string>
+    <string name="protection_disabled">Захист вимкнено</string>
+    <string name="screenguard_active">ScreenGuard активний</string>
+    <string name="screenguard_protected">Ваш телефон захищено</string>
+
+    <!-- Notifications -->
+    <string name="alert_channel_name">ScreenGuard Alerts</string>
+    <string name="alert_channel_desc">Сповіщення про спроби доступу</string>
+    <string name="alert_notification_title">🚨 ПОПЕРЕДЖЕННЯ ScreenGuard</string>
+    <string name="alert_notification_text">На ваш екран дивиться стороння особа!</string>
+</resources>
