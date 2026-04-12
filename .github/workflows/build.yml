@@ -49,6 +49,17 @@ jobs:
             </style>
         </resources>
         EOF
+        
+        # Створюємо файли-заглушки для відсутніх іконок додатку
+        mkdir -p src/main/res/mipmap
+        cat <<EOF > src/main/res/mipmap/ic_launcher.xml
+        <?xml version="1.0" encoding="utf-8"?>
+        <shape xmlns:android="http://schemas.android.com/apk/res/android">
+            <solid android:color="#000000"/>
+        </shape>
+        EOF
+        # Копіюємо для круглої версії іконки (часто вимагається маніфестом)
+        cp src/main/res/mipmap/ic_launcher.xml src/main/res/mipmap/ic_launcher_round.xml
 
     - name: Build Debug APK
       run: gradle assembleDebug
