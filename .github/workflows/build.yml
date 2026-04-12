@@ -30,11 +30,15 @@ jobs:
         sed -i "s/id 'com.android.application'/id 'com.android.application' version '7.4.2'/g" build.gradle || true
         sed -i 's/id "com.android.application"/id "com.android.application" version "7.4.2"/g' build.gradle || true
         
-        # Виправляємо плагіни Kotlin (обидва формати запису, які міг використати автор)
+        # Виправляємо плагіни Kotlin
         sed -i "s/id 'org.jetbrains.kotlin.android'/id 'org.jetbrains.kotlin.android' version '1.8.0'/g" build.gradle || true
         sed -i 's/id "org.jetbrains.kotlin.android"/id "org.jetbrains.kotlin.android" version "1.8.0"/g' build.gradle || true
         sed -i "s/id 'kotlin-android'/id 'org.jetbrains.kotlin.android' version '1.8.0'/g" build.gradle || true
         sed -i 's/id "kotlin-android"/id "org.jetbrains.kotlin.android" version "1.8.0"/g' build.gradle || true
+        
+        # Вмикаємо підтримку AndroidX
+        echo "android.useAndroidX=true" >> gradle.properties
+        echo "android.enableJetifier=true" >> gradle.properties
 
     - name: Build Debug APK
       run: gradle assembleDebug
