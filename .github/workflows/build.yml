@@ -26,31 +26,27 @@ jobs:
 
     - name: Patch project files
       run: |
-        # Виправляємо головний плагін Android
+        # 1. Виправляємо плагіни Android та Kotlin
         sed -i "s/id 'com.android.application'/id 'com.android.application' version '7.4.2'/g" build.gradle || true
         sed -i 's/id "com.android.application"/id "com.android.application" version "7.4.2"/g' build.gradle || true
+        sed -i "s/id 'org.jetbrains.kotlin.android'/id 'org.jetbrains.kotlin.android' version '1.8.22'/g" build.gradle || true
+        sed -i 's/id "org.jetbrains.kotlin.android"/id "org.jetbrains.kotlin.android" version "1.8.22"/g' build.gradle || true
+        sed -i "s/id 'kotlin-android'/id 'org.jetbrains.kotlin.android' version '1.8.22'/g" build.gradle || true
+        sed -i 's/id "kotlin-android"/id "org.jetbrains.kotlin.android" version "1.8.22"/g' build.gradle || true
         
-        # Виправляємо плагіни Kotlin
-        sed -i "s/id 'org.jetbrains.kotlin.android'/id 'org.jetbrains.kotlin.android' version '1.8.0'/g" build.gradle || true
-        sed -i 's/id "org.jetbrains.kotlin.android"/id "org.jetbrains.kotlin.android" version "1.8.0"/g' build.gradle || true
-        sed -i "s/id 'kotlin-android'/id 'org.jetbrains.kotlin.android' version '1.8.0'/g" build.gradle || true
-        sed -i 's/id "kotlin-android"/id "org.jetbrains.kotlin.android" version "1.8.0"/g' build.gradle || true
-        
-        # Вмикаємо підтримку AndroidX
+        # 2. Вмикаємо підтримку AndroidX
         echo "android.useAndroidX=true" >> gradle.properties
         echo "android.enableJetifier=true" >> gradle.properties
         
-        # Створюємо файл-заглушку для відсутнього стилю тексту
+        # 3. Створюємо файли-заглушки для стилів та іконок
         mkdir -p src/main/res/values
         cat <<EOF > src/main/res/values/missing_styles.xml
         <?xml version="1.0" encoding="utf-8"?>
         <resources>
-            <style name="TextAppearance.ScreenGuard" parent="android:TextAppearance">
-            </style>
+            <style name="TextAppearance.ScreenGuard" parent="android:TextAppearance" />
         </resources>
         EOF
         
-        # Створюємо файли-заглушки для відсутніх іконок додатку
         mkdir -p src/main/res/mipmap
         cat <<EOF > src/main/res/mipmap/ic_launcher.xml
         <?xml version="1.0" encoding="utf-8"?>
@@ -58,8 +54,22 @@ jobs:
             <solid android:color="#000000"/>
         </shape>
         EOF
-        # Копіюємо для круглої версії іконки (часто вимагається маніфестом)
-        cp src/main/res/mipmap/ic_launcher.xml src/main/res/mipmap/ic_launcher_round.xml
+        cp src/main/res/mipmap/ic_launcher.xml src/main/res/mipmap/ic_launcher_round.xml || true
+        
+        # 4. ВИПРАВЛЯЄМО ОДРУКІВКУ АВТОРА В УСІХ ФАЙЛАХ
+        find . -type f -name "*.xml" -exec sed -i 's/android:marginBottom/android:layout_marginBottom/g' {} + || true
+
+        # 5. ПРИМУСОВО ЗНИЖУЄМО ВЕРСІЮ KOTLIN ДО СУМІСНОЇ
+        cat <<EOF >> build.gradle
+        
+        configurations.all {
+            resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+                if (details.requested.group == 'org.jetbrains.kotlin' && details.requested.name.startsWith('kotlin-stdlib')) {
+                    details.useVersion '1.8.22'
+                }
+            }
+        }
+        EOF
 
     - name: Build Debug APK
       run: gradle assembleDebug
