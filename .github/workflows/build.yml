@@ -26,20 +26,15 @@ jobs:
 
     - name: Patch project files
       run: |
-        # Додаємо репозиторії Google, щоб система знала, звідки качати Android-плагіни
-        echo "pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }" > temp_settings.gradle
-        cat settings.gradle >> temp_settings.gradle
-        mv temp_settings.gradle settings.gradle
+        # Додаємо відсутні версії плагінів тільки у build.gradle, не чіпаючи settings.gradle
+        sed -i "s/id 'com.android.application'/id 'com.android.application' version '7.4.2'/g" build.gradle || true
+        sed -i 's/id "com.android.application"/id "com.android.application" version "7.4.2"/g' build.gradle || true
+        sed -i "s/id 'org.jetbrains.kotlin.android'/id 'org.jetbrains.kotlin.android' version '1.8.0'/g" build.gradle || true
+        sed -i 's/id "org.jetbrains.kotlin.android"/id "org.jetbrains.kotlin.android" version "1.8.0"/g' build.gradle || true
         
-        # Автоматично дописуємо відсутню версію плагінів у build.gradle
-        sed -i "s/id 'com.android.application'/id 'com.android.application' version '7.4.2'/g" build.gradle
-        sed -i 's/id "com.android.application"/id "com.android.application" version "7.4.2"/g' build.gradle
-        sed -i "s/id 'org.jetbrains.kotlin.android'/id 'org.jetbrains.kotlin.android' version '1.8.0'/g" build.gradle
-        sed -i 's/id "org.jetbrains.kotlin.android"/id "org.jetbrains.kotlin.android" version "1.8.0"/g' build.gradle
-        
-        # Захист від помилок на випадок, якщо версія десь була вказана
-        sed -i "s/version '7.4.2' version '7.4.2'/version '7.4.2'/g" build.gradle
-        sed -i 's/version "7.4.2" version "7.4.2"/version "7.4.2"/g' build.gradle
+        # Захист від дублювання версій
+        sed -i "s/version '7.4.2' version '7.4.2'/version '7.4.2'/g" build.gradle || true
+        sed -i 's/version "7.4.2" version "7.4.2"/version "7.4.2"/g' build.gradle || true
 
     - name: Build Debug APK
       run: gradle assembleDebug
@@ -48,5 +43,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: ScreenGuard-APK
-        # Збираємо всі APK файли, де б вони не згенерувалися
         path: '**/*.apk'
