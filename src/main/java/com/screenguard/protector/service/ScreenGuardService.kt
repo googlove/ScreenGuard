@@ -10,6 +10,7 @@ import android.os.IBinder
 import android.util.Log
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.NotificationCompat
@@ -89,7 +90,9 @@ class ScreenGuardService : Service(), LifecycleOwner {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
         cameraProviderFuture.addListener({
             try {
-                cameraProvider = cameraProviderFuture.result
+                if (cameraProviderFuture.isDone) {
+                    cameraProvider = cameraProviderFuture.get()
+                }
                 bindCameraUseCases()
             } catch (e: Exception) {
                 Log.e(TAG, "Camera initialization error: ${e.message}")
@@ -129,7 +132,7 @@ class ScreenGuardService : Service(), LifecycleOwner {
         }
     }
 
-    private fun detectFaces(imageProxy: ImageAnalysis.ResultImage) {
+    private fun detectFaces(imageProxy: ImageProxy) {
         try {
             val image = InputImage.fromMediaImage(imageProxy.image!!, imageProxy.imageInfo.rotationDegrees)
             
