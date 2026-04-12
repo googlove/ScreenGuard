@@ -89,7 +89,7 @@ class ScreenGuardService : Service(), LifecycleOwner {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
         cameraProviderFuture.addListener({
             try {
-                cameraProvider = cameraProviderFuture.result
+                //cameraProvider = cameraProviderFuture.result
                 bindCameraUseCases()
             } catch (e: Exception) {
                 Log.e(TAG, "Camera initialization error: ${e.message}")
@@ -129,7 +129,7 @@ class ScreenGuardService : Service(), LifecycleOwner {
         }
     }
 
-    private fun detectFaces(imageProxy: ImageAnalysis.ResultImage) {
+    // private fun detectFaces(imageProxy: ImageAnalysis.ResultImage) {
         try {
             val image = InputImage.fromMediaImage(imageProxy.image!!, imageProxy.imageInfo.rotationDegrees)
             
