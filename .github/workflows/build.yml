@@ -39,6 +39,16 @@ jobs:
         # Вмикаємо підтримку AndroidX
         echo "android.useAndroidX=true" >> gradle.properties
         echo "android.enableJetifier=true" >> gradle.properties
+        
+        # Створюємо файл-заглушку для відсутнього стилю тексту
+        mkdir -p src/main/res/values
+        cat <<EOF > src/main/res/values/missing_styles.xml
+        <?xml version="1.0" encoding="utf-8"?>
+        <resources>
+            <style name="TextAppearance.ScreenGuard" parent="android:TextAppearance">
+            </style>
+        </resources>
+        EOF
 
     - name: Build Debug APK
       run: gradle assembleDebug
