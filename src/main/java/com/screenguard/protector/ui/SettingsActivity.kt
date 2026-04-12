@@ -65,7 +65,7 @@ class SettingsActivity : AppCompatActivity() {
         binding.clearHistoryButton.setOnClickListener {
             val dialog = androidx.appcompat.app.AlertDialog.Builder(this)
                 .setTitle("Видалити історію?")
-                .setMessage("Ви впевнені, що хочете видалити всю історію?)
+                .setMessage("Ви впевнені, що хочете видалити всю історію?")
                 .setPositiveButton("Видалити") { _, _ ->
                     lifecycleScope.launch {
                         preferencesManager.resetAlertCount()
@@ -94,7 +94,7 @@ class SettingsActivity : AppCompatActivity() {
                 "ScreenGuard v1.0.0\n\n" +
                 "Додаток для захисту вашого приватності від\n" +
                 "небажаних спостерігачів.\n\n" +
-                "© 2024 ScreenGuard"
+                "© 2026 ScreenGuard"
             )
             .setPositiveButton("OK", null)
             .create()
