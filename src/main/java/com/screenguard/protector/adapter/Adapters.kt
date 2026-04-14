@@ -135,14 +135,6 @@ class CapturesAdapter(
                 captureFileName.text = file.name
                 captureDatetime.text = formatDate(file.lastModified())
                 
-                // Клік на знімок → відкривання в ImagePreviewActivity
-                root.setOnClickListener {
-                    val context = binding.root.context
-                    val intent = android.content.Intent(context, ImagePreviewActivity::class.java)
-                    intent.putExtra(ImagePreviewActivity.EXTRA_FILE_PATH, file.absolutePath)
-                    context.startActivity(intent)
-                }
-                
                 // Long click → опції управління
                 root.setOnLongClickListener {
                     onItemClick(file)
