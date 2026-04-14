@@ -2,80 +2,84 @@ name: Build ScreenGuard APK
 
 on:
   push:
+    branches: [ "main", "master", "develop" ]
+  pull_request:
     branches: [ "main", "master" ]
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      packages: write
 
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: Set up JDK 11
       uses: actions/setup-java@v4
       with:
         java-version: '11'
         distribution: 'temurin'
+        cache: gradle
 
     - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v4
-      with:
-        gradle-version: '7.6'
+      uses: gradle/actions/setup-gradle@v3
 
-    - name: Patch project files
-      run: |
-        # 1. Виправляємо плагіни Android та Kotlin
-        sed -i "s/id 'com.android.application'/id 'com.android.application' version '7.4.2'/g" build.gradle || true
-        sed -i 's/id "com.android.application"/id "com.android.application" version "7.4.2"/g' build.gradle || true
-        sed -i "s/id 'org.jetbrains.kotlin.android'/id 'org.jetbrains.kotlin.android' version '1.8.22'/g" build.gradle || true
-        sed -i 's/id "org.jetbrains.kotlin.android"/id "org.jetbrains.kotlin.android" version "1.8.22"/g' build.gradle || true
-        sed -i "s/id 'kotlin-android'/id 'org.jetbrains.kotlin.android' version '1.8.22'/g" build.gradle || true
-        sed -i 's/id "kotlin-android"/id "org.jetbrains.kotlin.android" version "1.8.22"/g' build.gradle || true
-        
-        # 2. Вмикаємо підтримку AndroidX
-        echo "android.useAndroidX=true" >> gradle.properties
-        echo "android.enableJetifier=true" >> gradle.properties
-        
-        # 3. Створюємо файли-заглушки для стилів та іконок
-        mkdir -p src/main/res/values
-        cat <<EOF > src/main/res/values/missing_styles.xml
-        <?xml version="1.0" encoding="utf-8"?>
-        <resources>
-            <style name="TextAppearance.ScreenGuard" parent="android:TextAppearance" />
-        </resources>
-        EOF
-        
-        mkdir -p src/main/res/mipmap
-        cat <<EOF > src/main/res/mipmap/ic_launcher.xml
-        <?xml version="1.0" encoding="utf-8"?>
-        <shape xmlns:android="http://schemas.android.com/apk/res/android">
-            <solid android:color="#000000"/>
-        </shape>
-        EOF
-        cp src/main/res/mipmap/ic_launcher.xml src/main/res/mipmap/ic_launcher_round.xml || true
-        
-        # 4. ВИПРАВЛЯЄМО ОДРУКІВКУ АВТОРА В УСІХ ФАЙЛАХ
-        find . -type f -name "*.xml" -exec sed -i 's/android:marginBottom/android:layout_marginBottom/g' {} + || true
+    - name: Make gradlew executable
+      run: chmod +x ./gradlew
 
-        # 5. ПРИМУСОВО ЗНИЖУЄМО ВЕРСІЮ KOTLIN ДО СУМІСНОЇ
-        cat <<EOF >> build.gradle
-        
-        configurations.all {
-            resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-                if (details.requested.group == 'org.jetbrains.kotlin' && details.requested.name.startsWith('kotlin-stdlib')) {
-                    details.useVersion '1.8.22'
-                }
-            }
-        }
-        EOF
+    - name: Validate Gradle wrapper
+      run: ./gradlew wrapper --gradle-version=7.6
 
     - name: Build Debug APK
-      run: gradle assembleDebug
+      run: ./gradlew assembleDebug --stacktrace --info
+      env:
+        GRADLE_OPTS: -Xmx2048m -XX:MaxPermSize=512m
 
-    - name: Upload APK
+    - name: Build Release APK (optional)
+      run: ./gradlew assembleRelease --stacktrace --info
+      continue-on-error: true
+      env:
+        GRADLE_OPTS: -Xmx2048m -XX:MaxPermSize=512m
+
+    - name: Upload Debug APK
       uses: actions/upload-artifact@v4
       with:
-        name: ScreenGuard-APK
-        path: '**/*.apk'
+        name: ScreenGuard-Debug-APK
+        path: build/outputs/apk/debug/*.apk
+        if-no-files-found: warn
+        retention-days: 30
+
+    - name: Upload Release APK
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: ScreenGuard-Release-APK
+        path: build/outputs/apk/release/*.apk
+        if-no-files-found: ignore
+        retention-days: 30
+
+    - name: Generate Build Report
+      if: always()
+      run: |
+        echo "## Build Report" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Build Date:** $(date)" >> $GITHUB_STEP_SUMMARY
+        echo "**Gradle Version:** 7.6" >> $GITHUB_STEP_SUMMARY
+        echo "**Java Version:** 11" >> $GITHUB_STEP_SUMMARY
+        echo "**Branch:** ${{ github.ref }}" >> $GITHUB_STEP_SUMMARY
+
+    - name: Notify on Success
+      if: success()
+      run: echo "✅ Build succeeded! APKs ready for download."
+
+    - name: Notify on Failure
+      if: failure()
+      run: echo "❌ Build failed! Check logs above."
+
