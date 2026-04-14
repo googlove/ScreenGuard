@@ -38,13 +38,13 @@ jobs:
     - name: Build Debug APK
       run: gradle assembleDebug --stacktrace --info
       env:
-        GRADLE_OPTS: -Xmx1536m
+        GRADLE_OPTS: -Xmx2048m
 
     - name: Build Release APK (optional)
       run: gradle assembleRelease --stacktrace --info
       continue-on-error: true
       env:
-        GRADLE_OPTS: -Xmx1536m
+        GRADLE_OPTS: -Xmx2048m
 
     - name: Upload Debug APK
       uses: actions/upload-artifact@v4
@@ -69,8 +69,8 @@ jobs:
         echo "## Build Report" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**Build Date:** $(date)" >> $GITHUB_STEP_SUMMARY
-        echo "**Gradle Version:** 7.6.1" >> $GITHUB_STEP_SUMMARY
-        echo "**Java Version:** 17" >> $GITHUB_STEP_SUMMARY
+        echo "**Gradle Version:** 7.6" >> $GITHUB_STEP_SUMMARY
+        echo "**Java Version:** 11" >> $GITHUB_STEP_SUMMARY
         echo "**Branch:** ${{ github.ref }}" >> $GITHUB_STEP_SUMMARY
 
     - name: Notify on Success
