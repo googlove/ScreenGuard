@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="4dp">
+
+    <!-- Image -->
+    <ImageView
+        android:id="@+id/captureImage"
+        android:layout_width="match_parent"
+        android:layout_height="180dp"
+        android:scaleType="centerCrop"
+        android:background="?attr/colorSurface"
+        android:contentDescription="Captured image" />
+
+    <!-- File name -->
+    <TextView
+        android:id="@+id/captureFileName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="image.jpg"
+        android:textSize="11sp"
+        android:maxLines="1"
+        android:ellipsize="middle"
+        android:padding="4dp" />
+
+    <!-- Date time -->
+    <TextView
+        android:id="@+id/captureDatetime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="01.01.2026 12:00"
+        android:textSize="10sp"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
+        android:paddingBottom="4dp" />
+
+</LinearLayout>
