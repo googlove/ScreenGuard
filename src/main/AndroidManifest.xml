@@ -87,13 +87,6 @@
             android:screenOrientation="portrait"
             android:parentActivityName=".MainActivity" />
 
-        <!-- Image Preview Activity (NEW - для переглядання знімків) -->
-        <activity
-            android:name=".ui.ImagePreviewActivity"
-            android:exported="false"
-            android:screenOrientation="portrait"
-            android:parentActivityName=".ui.CapturesActivity" />
-
         <!-- Screen Guard Detection Service -->
         <service
             android:name=".service.ScreenGuardService"
