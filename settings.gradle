@@ -4,6 +4,11 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
     }
+    
+    plugins {
+        kotlin('android') version '1.9.23'
+        kotlin('kapt') version '1.9.23'
+    }
 }
 
 dependencyResolutionManagement {
