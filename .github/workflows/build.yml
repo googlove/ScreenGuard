@@ -34,13 +34,13 @@ jobs:
     - name: Build Debug APK
       run: gradle assembleDebug --stacktrace --info
       env:
-        GRADLE_OPTS: -Xmx2048m -XX:MaxPermSize=512m
+        GRADLE_OPTS: -Xmx2048m
 
     - name: Build Release APK (optional)
       run: gradle assembleRelease --stacktrace --info
       continue-on-error: true
       env:
-        GRADLE_OPTS: -Xmx2048m -XX:MaxPermSize=512m
+        GRADLE_OPTS: -Xmx2048m
 
     - name: Upload Debug APK
       uses: actions/upload-artifact@v4
@@ -76,4 +76,3 @@ jobs:
     - name: Notify on Failure
       if: failure()
       run: echo "❌ Build failed! Check logs above."
-
