@@ -6,9 +6,10 @@ import android.app.NotificationManager
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
@@ -30,13 +31,16 @@ class MainActivity : AppCompatActivity() {
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
+            Log.d(TAG, "Camera permission granted")
             toggleProtection(true)
         } else {
+            Log.w(TAG, "Camera permission denied")
             Toast.makeText(
                 this,
-                "Дозвіл на камеру необхідний",
-                Toast.LENGTH_SHORT
+                "Дозвіл на камеру необхідний для роботи додатку",
+                Toast.LENGTH_LONG
             ).show()
+            binding.toggleProtection.isChecked = false
         }
     }
 
@@ -45,6 +49,8 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        Log.d(TAG, "MainActivity created")
+        
         preferencesManager = PreferencesManager(this)
         setupUI()
         createNotificationChannel()
@@ -54,6 +60,7 @@ class MainActivity : AppCompatActivity() {
     private fun setupUI() {
         // Toggle Protection
         binding.toggleProtection.setOnCheckedChangeListener { _, isChecked ->
+            Log.d(TAG, "Protection toggle changed to: $isChecked")
             if (isChecked) {
                 if (ContextCompat.checkSelfPermission(
                         this,
@@ -62,6 +69,7 @@ class MainActivity : AppCompatActivity() {
                 ) {
                     toggleProtection(true)
                 } else {
+                    Log.d(TAG, "Requesting camera permission")
                     cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
                 }
             } else {
@@ -71,89 +79,140 @@ class MainActivity : AppCompatActivity() {
 
         // Settings Button
         binding.settingsButton.setOnClickListener {
+            Log.d(TAG, "Settings button clicked")
             startActivity(Intent(this, SettingsActivity::class.java))
         }
 
         // Whitelist Button
         binding.whitelistButton.setOnClickListener {
+            Log.d(TAG, "Whitelist button clicked")
             startActivity(Intent(this, WhitelistActivity::class.java))
         }
 
         // History Button
         binding.historyButton.setOnClickListener {
+            Log.d(TAG, "History button clicked")
             startActivity(Intent(this, HistoryActivity::class.java))
+        }
+
+        // Captures Button (NEW)
+        binding.capturesButton.setOnClickListener {
+            Log.d(TAG, "Captures button clicked")
+            startActivity(Intent(this, CapturesActivity::class.java))
         }
 
         // Status Updates
         lifecycleScope.launch {
-            preferencesManager.isServiceRunning.collect { isRunning ->
-                isServiceRunning = isRunning
-                binding.toggleProtection.isChecked = isRunning
-                binding.statusText.text = if (isRunning) {
-                    "🛡️ Захист активний"
-                } else {
-                    "⚠️ Захист вимкнено"
+            try {
+                preferencesManager.isServiceRunning.collect { isRunning ->
+                    Log.d(TAG, "Service running status: $isRunning")
+                    isServiceRunning = isRunning
+                    binding.toggleProtection.isChecked = isRunning
+                    updateStatusUI(isRunning)
                 }
-                binding.statusText.setTextColor(
-                    ContextCompat.getColor(
-                        this@MainActivity,
-                        if (isRunning) android.R.color.holo_green_dark else android.R.color.holo_red_dark
-                    )
-                )
+            } catch (e: Exception) {
+                Log.e(TAG, "Error observing service status: ${e.message}", e)
             }
         }
 
         // Alert Count
         lifecycleScope.launch {
-            preferencesManager.alertCount.collect { count ->
-                binding.alertCountText.text = "Спроб доступу: $count"
+            try {
+                preferencesManager.alertCount.collect { count ->
+                    Log.d(TAG, "Alert count updated to: $count")
+                    binding.alertCountText.text = "Спроб доступу: $count"
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error observing alert count: ${e.message}", e)
             }
         }
     }
 
-    private fun toggleProtection(enable: Boolean) {
-        val intent = Intent(this, ScreenGuardService::class.java)
-        
-        if (enable) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(intent)
-            } else {
-                startService(intent)
-            }
-            lifecycleScope.launch {
-                preferencesManager.saveServiceRunning(true)
-            }
-            Toast.makeText(this, "Захист включено", Toast.LENGTH_SHORT).show()
+    private fun updateStatusUI(isRunning: Boolean) {
+        binding.statusText.text = if (isRunning) {
+            "🛡️ Захист активний"
         } else {
-            stopService(intent)
-            lifecycleScope.launch {
-                preferencesManager.saveServiceRunning(false)
+            "⚠️ Захист вимкнено"
+        }
+        
+        binding.statusText.setTextColor(
+            ContextCompat.getColor(
+                this,
+                if (isRunning) android.R.color.holo_green_dark else android.R.color.holo_red_dark
+            )
+        )
+    }
+
+    private fun toggleProtection(enable: Boolean) {
+        try {
+            val intent = Intent(this, ScreenGuardService::class.java)
+            
+            if (enable) {
+                Log.d(TAG, "Starting ScreenGuardService")
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    startForegroundService(intent)
+                } else {
+                    @Suppress("DEPRECATION")
+                    startService(intent)
+                }
+                lifecycleScope.launch {
+                    preferencesManager.saveServiceRunning(true)
+                }
+                Toast.makeText(this, "✅ Захист включено", Toast.LENGTH_SHORT).show()
+            } else {
+                Log.d(TAG, "Stopping ScreenGuardService")
+                stopService(intent)
+                lifecycleScope.launch {
+                    preferencesManager.saveServiceRunning(false)
+                }
+                Toast.makeText(this, "⛔ Захист вимкнено", Toast.LENGTH_SHORT).show()
             }
-            Toast.makeText(this, "Захист вимкнено", Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error toggling protection: ${e.message}", e)
+            Toast.makeText(this, "Помилка: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                "screenguard_alerts",
-                "ScreenGuard Alerts",
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                description = "Сповіщення про спроби доступу"
-                enableVibration(true)
-                setShowBadge(true)
+            try {
+                val channel = NotificationChannel(
+                    "screenguard_alerts",
+                    "ScreenGuard Оповіщення",
+                    NotificationManager.IMPORTANCE_HIGH
+                ).apply {
+                    description = "Сповіщення про спроби несанкціонованого доступу"
+                    enableVibration(true)
+                    setShowBadge(true)
+                }
+                val notificationManager = getSystemService(NotificationManager::class.java)
+                notificationManager?.createNotificationChannel(channel)
+                Log.d(TAG, "Notification channel created")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error creating notification channel: ${e.message}", e)
             }
-            val notificationManager = getSystemService(NotificationManager::class.java)
-            notificationManager.createNotificationChannel(channel)
         }
     }
 
     private fun checkServiceStatus() {
         lifecycleScope.launch {
-            preferencesManager.isServiceRunning.collect { isRunning ->
-                binding.toggleProtection.isChecked = isRunning
+            try {
+                preferencesManager.isServiceRunning.collect { isRunning ->
+                    binding.toggleProtection.isChecked = isRunning
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error checking service status: ${e.message}", e)
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG, "MainActivity resumed")
+        checkServiceStatus()
+    }
+
+    companion object {
+        private const val TAG = "MainActivity"
     }
 }
