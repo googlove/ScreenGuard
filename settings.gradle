@@ -5,9 +5,12 @@ pluginManagement {
         gradlePluginPortal()
     }
     
-    plugins {
-        kotlin('android') version '1.9.23'
-        kotlin('kapt') version '1.9.23'
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id == 'kotlin-android' || requested.id.id == 'kotlin-kapt') {
+                useModule('org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.23')
+            }
+        }
     }
 }
 
